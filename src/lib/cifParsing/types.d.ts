@@ -27,7 +27,7 @@ type AtomSite = {
 // The x,y,z are coordinates and the type_symbol is the type of element the atom is (I think?)
 // We'll later colour by atom type
 type Coordinate = {
-  type_symbol: string;
+  element: string;
   x: number;
   y: number;
   z: number;

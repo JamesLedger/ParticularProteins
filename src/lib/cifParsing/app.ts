@@ -1,3 +1,4 @@
+import { writeFileSync } from "fs";
 import atomSiteToCoordinate from "./atomSiteToCoordinate";
 import extractCIFsections from "./extractCIFsections";
 import stringToAtomSite from "./stringToAtomSite";
@@ -25,6 +26,8 @@ async function main() {
   const coordinates = atomSites.map(atomSiteToCoordinate);
 
   console.log("coords:\n", coordinates);
+
+  writeFileSync("coordinates.json", JSON.stringify(coordinates, null, 2));
 }
 
 main();
