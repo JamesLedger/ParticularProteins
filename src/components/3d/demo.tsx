@@ -1,26 +1,48 @@
 import { Canvas } from "@react-three/fiber";
-import { CameraControls, Outlines } from "@react-three/drei";
+import { CameraControls, Outlines, Stage } from "@react-three/drei";
 import coordinates from "../../lib/cifParsing/coordinates.json";
-import { useState } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 
 function Demo({
   onSelect,
-}: Readonly<{ onSelect?: (coord: Coordinate) => void }>) {
+  onCameraReady,
+}: Readonly<{
+  onSelect?: (coord: Coordinate) => void;
+  onCameraReady?: (resetFn: () => void) => void;
+}>) {
+  const cameraControlsRef = useRef<CameraControls>(null);
+
+  const resetCamera = useCallback(() => {
+    if (cameraControlsRef.current) {
+      cameraControlsRef.current.reset(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (cameraControlsRef.current && onCameraReady) {
+        onCameraReady(resetCamera);
+      }
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [onCameraReady, resetCamera]);
+
   return (
     <Canvas
       style={{ background: "white", width: "100%", height: "100%" }}
-      camera={{ position: [-10, 0, 50] }}
+      camera={{ position: [-5, 0, 50] }}
     >
-      <CameraControls />
-      <ambientLight />
-
-      {coordinates.map((coord, idx) => (
-        <Element
-          key={`${coord.element}-${idx}`}
-          coords={coord}
-          onSelect={onSelect}
-        />
-      ))}
+      <CameraControls ref={cameraControlsRef} makeDefault />
+      <Stage adjustCamera={false}>
+        {coordinates.map((coord, idx) => (
+          <Element
+            key={`${coord.element}-${idx}`}
+            coords={coord}
+            onSelect={onSelect}
+          />
+        ))}
+      </Stage>
     </Canvas>
   );
 }

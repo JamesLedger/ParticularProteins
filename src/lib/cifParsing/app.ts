@@ -25,8 +25,6 @@ async function main() {
 
   const coordinates = atomSites.map(atomSiteToCoordinate);
 
-  console.log("coords:\n", coordinates);
-
   writeFileSync("coordinates.json", JSON.stringify(coordinates, null, 2));
 }
 

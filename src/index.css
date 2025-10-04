@@ -128,3 +128,9 @@
     background-attachment: fixed;
   }
 }
+
+html,
+body,
+#root {
+  height: 100%;
+}
