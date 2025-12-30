@@ -1,8 +1,9 @@
 'use client';
 
 import { Canvas } from '@react-three/fiber';
-import { CameraControls, Outlines, Stage } from '@react-three/drei';
+import { CameraControls, Stage } from '@react-three/drei';
 import { useState, useRef, useEffect, useCallback } from 'react';
+import InstancedAtoms from './InstancedAtoms';
 
 type Coordinate = {
   element: string;
@@ -49,54 +50,17 @@ function ProteinCanvas({
   return (
     <Canvas
       style={{ background: 'var(--flexoki-950)', width: '100%', height: '100%' }}
-      camera={{ position: [-5, 0, 50] }}
+      camera={{
+        position: [-5, 0, 50],
+        near: 0.01,
+        far: 1000
+      }}
     >
       <CameraControls ref={cameraControlsRef} makeDefault />
       <Stage adjustCamera={false}>
-        {coordinates.map((coord, idx) => (
-          <AtomElement key={`${coord.element}-${idx}`} coords={coord} onSelect={onSelect} />
-        ))}
+        <InstancedAtoms coordinates={coordinates} onSelect={onSelect} />
       </Stage>
     </Canvas>
-  );
-}
-
-function AtomElement({
-  coords,
-  onSelect,
-}: {
-  coords: Coordinate;
-  onSelect?: (coord: Coordinate) => void;
-}) {
-  const getElementColor = (element: string) => {
-    switch (element) {
-      case 'N':
-        return 'blue';
-      case 'C':
-        return 'green';
-      case 'O':
-        return 'red';
-      case 'S':
-        return 'yellow';
-      default:
-        return 'gray';
-    }
-  };
-
-  const [hovered, setHovered] = useState(false);
-
-  return (
-    <mesh
-      scale={0.2}
-      position={[coords.x, coords.y, coords.z]}
-      onClick={() => onSelect?.(coords)}
-      onPointerEnter={() => setHovered(true)}
-      onPointerLeave={() => setHovered(false)}
-    >
-      <sphereGeometry />
-      <meshBasicMaterial color={getElementColor(coords.element)} />
-      {hovered && <Outlines screenspace={true} thickness={0.5} color="orange" />}
-    </mesh>
   );
 }
 
