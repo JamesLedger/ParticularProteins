@@ -12,6 +12,7 @@ type Coordinate = {
 };
 
 interface ProteinViewerProps {
+  coordinates?: Coordinate[];
   coordinatesUrl?: string;
   width?: number | string;
   height?: number | string;
@@ -100,36 +101,49 @@ function AtomElement({
 }
 
 export default function ProteinViewer({
-  coordinatesUrl = '/1XPB-coordinates.json',
+  coordinates: coordinatesProp,
+  coordinatesUrl,
   width = 600,
   height = 400,
   showControls = true,
 }: ProteinViewerProps) {
-  const [coordinates, setCoordinates] = useState<Coordinate[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [coordinates, setCoordinates] = useState<Coordinate[]>(coordinatesProp || []);
+  const [isLoading, setIsLoading] = useState(!coordinatesProp && !!coordinatesUrl);
   const [error, setError] = useState<string | null>(null);
   const [selectedAtom, setSelectedAtom] = useState<Coordinate | null>(null);
   const [resetCameraFn, setResetCameraFn] = useState<(() => void) | null>(null);
 
+  // If coordinates are provided as prop, use them directly
   useEffect(() => {
-    const loadCoordinates = async () => {
-      try {
-        setIsLoading(true);
-        const response = await fetch(coordinatesUrl);
-        if (!response.ok) {
-          throw new Error('Failed to load protein data');
-        }
-        const data = await response.json();
-        setCoordinates(data);
-        setIsLoading(false);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load protein data');
-        setIsLoading(false);
-      }
-    };
+    if (coordinatesProp) {
+      setCoordinates(coordinatesProp);
+      setIsLoading(false);
+      setError(null);
+    }
+  }, [coordinatesProp]);
 
-    loadCoordinates();
-  }, [coordinatesUrl]);
+  // If coordinatesUrl is provided, fetch from URL
+  useEffect(() => {
+    if (!coordinatesProp && coordinatesUrl) {
+      const loadCoordinates = async () => {
+        try {
+          setIsLoading(true);
+          const response = await fetch(coordinatesUrl);
+          if (!response.ok) {
+            throw new Error('Failed to load protein data');
+          }
+          const data = await response.json();
+          setCoordinates(data);
+          setIsLoading(false);
+        } catch (err) {
+          setError(err instanceof Error ? err.message : 'Failed to load protein data');
+          setIsLoading(false);
+        }
+      };
+
+      loadCoordinates();
+    }
+  }, [coordinatesUrl, coordinatesProp]);
 
   const handleCameraReady = useCallback((resetFn: () => void) => {
     setResetCameraFn(() => resetFn);

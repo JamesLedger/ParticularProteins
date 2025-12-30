@@ -6,9 +6,52 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
+import { fetchPDBData } from "./lib/cifParsing/browserCifParser";
 import ProteinViewer from "./components/3d/protein-viewer-export";
 
 function App() {
+  const [pdbId, setPdbId] = useState("1XPB");
+  const [inputValue, setInputValue] = useState("1XPB");
+  const [coordinates, setCoordinates] = useState<Coordinate[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Load default protein on mount
+  useEffect(() => {
+    handleLoadProtein();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleLoadProtein = async () => {
+    if (!inputValue.trim()) {
+      setError("Please enter a PDB ID");
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const data = await fetchPDBData(inputValue.trim());
+      setCoordinates(data);
+      setPdbId(inputValue.trim().toUpperCase());
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load protein");
+      setCoordinates([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleLoadProtein();
+    }
+  };
+
   return (
     <div className="w-full h-screen flex flex-col gap-4 p-4">
       <h1 className="mb-0 text-balance font-medium text-5xl tracking-tighter!">
@@ -16,18 +59,54 @@ function App() {
       </h1>
       <Card className="min-h-0">
         <CardHeader>
-          <CardTitle>1XPB.cif</CardTitle>
+          <CardTitle>Protein Structure Viewer</CardTitle>
           <CardDescription>
-            Interactive 3D protein structure visualization
+            Enter a PDB ID to visualize protein structures in 3D
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <ProteinViewer
-            coordinatesUrl="/1XPB-coordinates.json"
-            width="100%"
-            height="50vh"
-            showControls={true}
-          />
+        <CardContent className="space-y-4">
+          <div className="flex gap-2">
+            <Input
+              type="text"
+              placeholder="Enter PDB ID (e.g., 1XPB)"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyPress={handleKeyPress}
+              className="flex-1"
+            />
+            <Button onClick={handleLoadProtein} disabled={isLoading}>
+              {isLoading ? "Loading..." : "Load Protein"}
+            </Button>
+          </div>
+
+          {error && (
+            <div className="p-3 bg-red-100 border border-red-300 text-red-800 rounded">
+              {error}
+            </div>
+          )}
+
+          {isLoading && (
+            <div className="flex items-center justify-center p-8">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+                <p>Loading protein structure...</p>
+              </div>
+            </div>
+          )}
+
+          {!isLoading && coordinates.length > 0 && (
+            <div className="space-y-2">
+              <p className="text-sm text-gray-600">
+                Viewing: <span className="font-semibold">{pdbId}</span> ({coordinates.length} atoms)
+              </p>
+              <ProteinViewer
+                coordinates={coordinates}
+                width="100%"
+                height="50vh"
+                showControls={true}
+              />
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
