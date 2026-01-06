@@ -12,6 +12,15 @@ import { useState, useEffect } from "react";
 import { fetchPDBData } from "./lib/cifParsing/browserCifParser";
 import ProteinViewer from "./components/3d/protein-viewer-export";
 
+// Curated list of PDB IDs from RCSB PDB Molecule of the Month
+const MOLECULE_OF_MONTH_PDBS = [
+  "9mee", "7dtw", "3jrs", "6tap", "7vcf", "2x0b", "6tz4", "8eiq", "8g02", "2pe4",
+  "7qv7", "7enc", "3fpz", "6j5t", "4jhw", "1t64", "5np0", "1opk", "8f76", "7qpd",
+  "5a31", "5xh3", "1q83", "7tpt", "5hzg", "5xth", "3chn", "7lsy", "4fxf", "6pv7",
+  "5t89", "6s7o", "5yh2", "7kj2", "6vz8", "4uv3", "6ahu", "1fdh", "1ckt", "6wlb",
+  "6x9q", "1mro", "6crz", "3jb9", "5xnl", "6j8j", "6lu7", "6j4y", "2dhb", "1mbn"
+];
+
 function App() {
   const [pdbId, setPdbId] = useState("1XPB");
   const [inputValue, setInputValue] = useState("1XPB");
@@ -52,6 +61,25 @@ function App() {
     }
   };
 
+  const handleRandomProtein = async () => {
+    const randomId = MOLECULE_OF_MONTH_PDBS[Math.floor(Math.random() * MOLECULE_OF_MONTH_PDBS.length)];
+    setInputValue(randomId);
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const data = await fetchPDBData(randomId);
+      setCoordinates(data);
+      setPdbId(randomId.toUpperCase());
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load protein");
+      setCoordinates([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="w-full h-screen flex flex-col gap-4 p-4">
       <h1 className="mb-0 text-balance font-medium text-5xl tracking-tighter!">
@@ -74,6 +102,9 @@ function App() {
               onKeyPress={handleKeyPress}
               className="flex-1"
             />
+            <Button variant="outline" onClick={handleRandomProtein} disabled={isLoading}>
+              Random
+            </Button>
             <Button onClick={handleLoadProtein} disabled={isLoading}>
               {isLoading ? "Loading..." : "Load Protein"}
             </Button>

@@ -3,7 +3,8 @@
     "allow": [
       "Bash(wc:*)",
       "Bash(git pull:*)",
-      "Bash(cp:*)"
+      "Bash(cp:*)",
+      "WebFetch(domain:pdb101.rcsb.org)"
     ]
   }
 }
