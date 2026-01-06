@@ -3,6 +3,7 @@
 import { Canvas } from '@react-three/fiber';
 import { CameraControls, Stage } from '@react-three/drei';
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { Box3, Vector3 } from 'three';
 import InstancedAtoms from './InstancedAtoms';
 
 type Coordinate = {
@@ -31,11 +32,27 @@ function ProteinCanvas({
 }) {
   const cameraControlsRef = useRef<CameraControls>(null);
 
+  const fitCameraToProtein = useCallback(() => {
+    if (!cameraControlsRef.current || coordinates.length === 0) return;
+
+    // Calculate bounding box from coordinates
+    const box = new Box3();
+    coordinates.forEach(coord => {
+      box.expandByPoint(new Vector3(coord.x, coord.y, coord.z));
+    });
+
+    // Fit camera to the bounding box with some padding
+    cameraControlsRef.current.fitToBox(box, true, {
+      paddingLeft: 0.1,
+      paddingRight: 0.1,
+      paddingTop: 0.1,
+      paddingBottom: 0.1,
+    });
+  }, [coordinates]);
+
   const resetCamera = useCallback(() => {
-    if (cameraControlsRef.current) {
-      cameraControlsRef.current.reset(true);
-    }
-  }, []);
+    fitCameraToProtein();
+  }, [fitCameraToProtein]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -46,6 +63,15 @@ function ProteinCanvas({
 
     return () => clearTimeout(timer);
   }, [onCameraReady, resetCamera]);
+
+  // Auto-fit camera when coordinates change
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fitCameraToProtein();
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [coordinates, fitCameraToProtein]);
 
   return (
     <Canvas
