@@ -61,25 +61,43 @@ function ProteinCanvas({
     }
   }, [fitCameraToProtein]);
 
+  // Initialize camera and register reset callback when coordinates are available
+  // Uses polling to wait for CameraControls ref to be ready
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (cameraControlsRef.current && onCameraReady) {
-        onCameraReady(resetCamera);
+    if (coordinates.length === 0) return;
+
+    let cancelled = false;
+    let attempts = 0;
+    const maxAttempts = 20;
+
+    const init = () => {
+      if (cancelled) return;
+
+      if (!cameraControlsRef.current) {
+        // CameraControls not ready yet, retry
+        if (attempts < maxAttempts) {
+          attempts++;
+          setTimeout(init, 50);
+        }
+        return;
       }
-    }, 100);
 
-    return () => clearTimeout(timer);
-  }, [onCameraReady, resetCamera]);
-
-  // Auto-fit camera when coordinates change and enable auto-rotation
-  useEffect(() => {
-    const timer = setTimeout(() => {
+      // Camera controls ready - fit camera and register callback
       fitCameraToProtein();
       setAutoRotateEnabled(true);
-    }, 100);
 
-    return () => clearTimeout(timer);
-  }, [coordinates, fitCameraToProtein]);
+      if (onCameraReady) {
+        onCameraReady(resetCamera);
+      }
+    };
+
+    // Start initialization
+    init();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [coordinates, fitCameraToProtein, onCameraReady, resetCamera]);
 
   const handlePointerDown = () => {
     setAutoRotateEnabled(false);
