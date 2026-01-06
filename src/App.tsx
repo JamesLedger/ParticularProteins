@@ -93,20 +93,24 @@ function App() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex gap-2">
+          <div className="flex gap-2 justify-center">
             <Input
               type="text"
               placeholder="Enter PDB ID (e.g., 1XPB)"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={handleKeyPress}
-              className="flex-1"
+              className="w-48"
             />
-            <Button variant="outline" onClick={handleRandomProtein} disabled={isLoading}>
-              Random
-            </Button>
             <Button onClick={handleLoadProtein} disabled={isLoading}>
               {isLoading ? "Loading..." : "Load Protein"}
+            </Button>
+            <Button
+              onClick={handleRandomProtein}
+              disabled={isLoading}
+              className="bg-gradient-to-r from-blue-500 via-green-500 via-red-500 to-yellow-500 hover:from-blue-600 hover:via-green-600 hover:via-red-600 hover:to-yellow-600 text-white"
+            >
+              Random
             </Button>
           </div>
 

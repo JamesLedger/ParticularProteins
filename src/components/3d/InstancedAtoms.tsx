@@ -1,6 +1,6 @@
-import { useRef, useMemo, useState, useEffect } from 'react';
-import { InstancedMesh, Object3D } from 'three';
-import { useFrame } from '@react-three/fiber';
+import { useRef, useMemo, useState, useEffect } from "react";
+import { InstancedMesh, Object3D } from "three";
+import { useFrame } from "@react-three/fiber";
 
 type Coordinate = {
   element: string;
@@ -22,16 +22,40 @@ interface AtomGroup {
 
 function getElementColor(element: string): string {
   switch (element) {
-    case 'N':
-      return 'blue';
-    case 'C':
-      return 'green';
-    case 'O':
-      return 'red';
-    case 'S':
-      return 'yellow';
+    case "N":
+      return "blue";
+    case "C":
+      return "green";
+    case "O":
+      return "red";
+    case "S":
+      return "yellow";
+    case "P":
+      return "#FFA500"; // Orange
+    case "H":
+      return "#FF69B4"; // Pink
+    case "FE":
+      return "#E06633"; // Dark orange/rust
+    case "ZN":
+      return "#7D80B0"; // Steel blue
+    case "MG":
+      return "#228B22"; // Forest green
+    case "CA":
+      return "#3CB371"; // Medium sea green
+    case "CU":
+      return "#C88033"; // Copper/brown
+    case "MN":
+      return "#9C7AC7"; // Violet/gray
+    case "SE":
+      return "#FF8C00"; // Dark orange
+    case "K":
+      return "#8F40D4"; // Purple
+    case "NA":
+      return "#AB5CF2"; // Light purple
+    case "CL":
+      return "#1FF01F"; // Bright green
     default:
-      return 'gray';
+      return "gray";
   }
 }
 
@@ -62,7 +86,10 @@ function InstancedAtomGroup({
 
   const handlePointerMove = (event: any) => {
     event.stopPropagation();
-    if (event.instanceId !== undefined && event.instanceId < group.atoms.length) {
+    if (
+      event.instanceId !== undefined &&
+      event.instanceId < group.atoms.length
+    ) {
       onAtomHover(group.atoms[event.instanceId]);
     }
   };
@@ -73,7 +100,10 @@ function InstancedAtomGroup({
 
   const handleClick = (event: any) => {
     event.stopPropagation();
-    if (event.instanceId !== undefined && event.instanceId < group.atoms.length) {
+    if (
+      event.instanceId !== undefined &&
+      event.instanceId < group.atoms.length
+    ) {
       onAtomClick(group.atoms[event.instanceId]);
     }
   };
@@ -92,8 +122,14 @@ function InstancedAtomGroup({
   );
 }
 
-export default function InstancedAtoms({ coordinates, onSelect }: InstancedAtomsProps) {
-  const [hoveredAtom, setHoveredAtom] = useState<{ coord: Coordinate; index: number } | null>(null);
+export default function InstancedAtoms({
+  coordinates,
+  onSelect,
+}: InstancedAtomsProps) {
+  const [hoveredAtom, setHoveredAtom] = useState<{
+    coord: Coordinate;
+    index: number;
+  } | null>(null);
   const outlineMeshRef = useRef<InstancedMesh>(null);
   const tempOutlineObject = useMemo(() => new Object3D(), []);
 
@@ -121,7 +157,11 @@ export default function InstancedAtoms({ coordinates, onSelect }: InstancedAtoms
     if (!outlineMeshRef.current) return;
 
     if (hoveredAtom) {
-      tempOutlineObject.position.set(hoveredAtom.coord.x, hoveredAtom.coord.y, hoveredAtom.coord.z);
+      tempOutlineObject.position.set(
+        hoveredAtom.coord.x,
+        hoveredAtom.coord.y,
+        hoveredAtom.coord.z
+      );
       tempOutlineObject.scale.set(0.25, 0.25, 0.25);
       tempOutlineObject.updateMatrix();
       outlineMeshRef.current.setMatrixAt(0, tempOutlineObject.matrix);
