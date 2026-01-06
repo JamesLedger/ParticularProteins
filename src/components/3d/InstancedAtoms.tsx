@@ -125,7 +125,7 @@ function InstancedAtomGroup({
 export default function InstancedAtoms({
   coordinates,
   onSelect,
-}: InstancedAtomsProps) {
+}: Readonly<InstancedAtomsProps>) {
   const [hoveredAtom, setHoveredAtom] = useState<{
     coord: Coordinate;
     index: number;

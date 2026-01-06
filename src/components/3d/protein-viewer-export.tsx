@@ -25,11 +25,11 @@ function ProteinCanvas({
   coordinates,
   onSelect,
   onCameraReady,
-}: {
+}: Readonly<{
   coordinates: Coordinate[];
   onSelect?: (coord: Coordinate) => void;
   onCameraReady?: (resetFn: () => void) => void;
-}) {
+}>) {
   const cameraControlsRef = useRef<CameraControls>(null);
   const [autoRotateEnabled, setAutoRotateEnabled] = useState(true);
 
@@ -105,7 +105,10 @@ function ProteinCanvas({
       onWheel={handleWheel}
     >
       <CameraControls ref={cameraControlsRef} makeDefault />
-      <AutoRotate cameraControlsRef={cameraControlsRef} enabled={autoRotateEnabled} />
+      <AutoRotate
+        cameraControlsRef={cameraControlsRef}
+        enabled={autoRotateEnabled}
+      />
       <Stage adjustCamera={false}>
         <InstancedAtoms coordinates={coordinates} onSelect={onSelect} />
       </Stage>
@@ -115,9 +118,9 @@ function ProteinCanvas({
 
 function AutoRotate({
   cameraControlsRef,
-  enabled
+  enabled,
 }: {
-  cameraControlsRef: React.RefObject<CameraControls>;
+  cameraControlsRef: React.RefObject<CameraControls | null>;
   enabled: boolean;
 }) {
   useFrame(() => {
