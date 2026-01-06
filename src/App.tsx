@@ -22,8 +22,12 @@ const MOLECULE_OF_MONTH_PDBS = [
 ];
 
 function App() {
-  const [pdbId, setPdbId] = useState("1XPB");
-  const [inputValue, setInputValue] = useState("1XPB");
+  // Check URL params for initial protein
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlProtein = urlParams.get('protein') || '1XPB';
+
+  const [pdbId, setPdbId] = useState(urlProtein);
+  const [inputValue, setInputValue] = useState(urlProtein);
   const [coordinates, setCoordinates] = useState<Coordinate[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,6 +36,22 @@ function App() {
   useEffect(() => {
     handleLoadProtein();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore if user is typing in an input
+      if (e.target instanceof HTMLInputElement) return;
+
+      if (e.key === 'r' || e.key === 'R') {
+        e.preventDefault();
+        handleRandomProtein();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isLoading]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleLoadProtein = async () => {
     if (!inputValue.trim()) {
@@ -45,10 +65,22 @@ function App() {
     try {
       const data = await fetchPDBData(inputValue.trim());
       setCoordinates(data);
-      setPdbId(inputValue.trim().toUpperCase());
+      const proteinId = inputValue.trim().toUpperCase();
+      setPdbId(proteinId);
       setError(null);
+
+      // Update URL for sharing
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.set('protein', proteinId);
+      window.history.replaceState({}, '', newUrl);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load protein");
+      const errorMessage = err instanceof Error ? err.message : "Failed to load protein";
+      const helpfulError = errorMessage.includes('404') || errorMessage.includes('not found')
+        ? `Protein "${inputValue.trim()}" not found. Check the PDB ID or try a random protein.`
+        : errorMessage.includes('network') || errorMessage.includes('fetch')
+        ? 'Network error. Check your internet connection and try again.'
+        : `Failed to load protein: ${errorMessage}`;
+      setError(helpfulError);
       setCoordinates([]);
     } finally {
       setIsLoading(false);
@@ -70,10 +102,17 @@ function App() {
     try {
       const data = await fetchPDBData(randomId);
       setCoordinates(data);
-      setPdbId(randomId.toUpperCase());
+      const proteinId = randomId.toUpperCase();
+      setPdbId(proteinId);
       setError(null);
+
+      // Update URL for sharing
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.set('protein', proteinId);
+      window.history.replaceState({}, '', newUrl);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load protein");
+      const errorMessage = err instanceof Error ? err.message : "Failed to load protein";
+      setError(`Failed to load random protein: ${errorMessage}. Try again!`);
       setCoordinates([]);
     } finally {
       setIsLoading(false);
@@ -93,7 +132,7 @@ function App() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex gap-2 justify-center">
+          <div className="flex gap-2 justify-center items-center">
             <Input
               type="text"
               placeholder="Enter PDB ID (e.g., 1XPB)"
@@ -112,6 +151,9 @@ function App() {
             >
               Random
             </Button>
+            <span className="text-xs text-muted-foreground ml-1">
+              (press <kbd className="px-1 py-0.5 bg-muted border border-border rounded text-foreground font-mono text-xs">R</kbd>)
+            </span>
           </div>
 
           {error && (
