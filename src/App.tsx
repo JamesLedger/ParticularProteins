@@ -120,11 +120,11 @@ function App() {
   };
 
   return (
-    <div className="w-full h-screen flex flex-col gap-4 p-4">
-      <h1 className="mb-0 text-balance font-medium text-5xl tracking-tighter!">
+    <div className="w-full min-h-screen flex flex-col gap-4 p-4 pb-8">
+      <h1 className="mb-0 text-balance font-medium text-3xl sm:text-5xl tracking-tighter!">
         Particular Proteins
       </h1>
-      <Card className="min-h-0">
+      <Card>
         <CardHeader>
           <CardTitle>Protein Structure Viewer</CardTitle>
           <CardDescription>
@@ -132,28 +132,30 @@ function App() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex gap-2 justify-center items-center">
+          <div className="flex flex-col sm:flex-row gap-2 justify-center items-center">
             <Input
               type="text"
               placeholder="Enter PDB ID (e.g., 1XPB)"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={handleKeyPress}
-              className="w-48"
+              className="w-full sm:w-48"
             />
-            <Button onClick={handleLoadProtein} disabled={isLoading}>
-              {isLoading ? "Loading..." : "Load Protein"}
-            </Button>
-            <Button
-              onClick={handleRandomProtein}
-              disabled={isLoading}
-              className="bg-gradient-to-r from-blue-500 via-green-500 via-red-500 to-yellow-500 hover:from-blue-600 hover:via-green-600 hover:via-red-600 hover:to-yellow-600 text-white"
-            >
-              Random
-            </Button>
-            <span className="text-xs text-muted-foreground ml-1">
-              (press <kbd className="px-1 py-0.5 bg-muted border border-border rounded text-foreground font-mono text-xs">R</kbd>)
-            </span>
+            <div className="flex gap-2 items-center">
+              <Button onClick={handleLoadProtein} disabled={isLoading}>
+                {isLoading ? "Loading..." : "Load Protein"}
+              </Button>
+              <Button
+                onClick={handleRandomProtein}
+                disabled={isLoading}
+                className="bg-gradient-to-r from-blue-500 via-green-500 via-red-500 to-yellow-500 hover:from-blue-600 hover:via-green-600 hover:via-red-600 hover:to-yellow-600 text-white"
+              >
+                Random
+              </Button>
+              <span className="text-xs text-muted-foreground ml-1 hidden sm:inline">
+                (press <kbd className="px-1 py-0.5 bg-muted border border-border rounded text-foreground font-mono text-xs">R</kbd>)
+              </span>
+            </div>
           </div>
 
           {error && (
@@ -179,7 +181,7 @@ function App() {
               <ProteinViewer
                 coordinates={coordinates}
                 width="100%"
-                height="50vh"
+                height="min(50vh, 400px)"
                 showControls={true}
               />
             </div>
