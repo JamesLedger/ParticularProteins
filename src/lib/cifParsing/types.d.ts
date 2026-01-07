@@ -32,3 +32,9 @@ type Coordinate = {
   y: number;
   z: number;
 };
+
+// This type contains metadata about the protein structure
+type ProteinMetadata = {
+  name?: string; // Common name from _entity_name_com.name
+  description?: string; // Description from _entity.pdbx_description
+};
