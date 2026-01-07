@@ -29,6 +29,7 @@ function App() {
   const [pdbId, setPdbId] = useState(urlProtein);
   const [inputValue, setInputValue] = useState(urlProtein);
   const [coordinates, setCoordinates] = useState<Coordinate[]>([]);
+  const [metadata, setMetadata] = useState<ProteinMetadata>({});
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -64,7 +65,8 @@ function App() {
 
     try {
       const data = await fetchPDBData(inputValue.trim());
-      setCoordinates(data);
+      setCoordinates(data.coordinates);
+      setMetadata(data.metadata);
       const proteinId = inputValue.trim().toUpperCase();
       setPdbId(proteinId);
       setError(null);
@@ -101,7 +103,8 @@ function App() {
 
     try {
       const data = await fetchPDBData(randomId);
-      setCoordinates(data);
+      setCoordinates(data.coordinates);
+      setMetadata(data.metadata);
       const proteinId = randomId.toUpperCase();
       setPdbId(proteinId);
       setError(null);
@@ -175,11 +178,17 @@ function App() {
 
           {!isLoading && coordinates.length > 0 && (
             <div className="space-y-2">
-              <p className="text-sm text-gray-600">
-                Viewing: <span className="font-semibold">{pdbId}</span> ({coordinates.length} atoms)
-              </p>
+              <div className="text-sm text-gray-600">
+                <p>
+                  Viewing: <span className="font-semibold">{pdbId}</span> ({coordinates.length} atoms)
+                </p>
+                {metadata.title && (
+                  <p className="text-xs mt-1 italic">{metadata.title}</p>
+                )}
+              </div>
               <ProteinViewer
                 coordinates={coordinates}
+                metadata={metadata}
                 width="100%"
                 height="min(50vh, 400px)"
                 showControls={true}

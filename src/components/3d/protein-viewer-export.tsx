@@ -16,6 +16,7 @@ type Coordinate = {
 interface ProteinViewerProps {
   coordinates?: Coordinate[];
   coordinatesUrl?: string;
+  metadata?: ProteinMetadata;
   width?: number | string;
   height?: number | string;
   showControls?: boolean;
@@ -152,6 +153,7 @@ function AutoRotate({
 export default function ProteinViewer({
   coordinates: coordinatesProp,
   coordinatesUrl,
+  metadata: metadataProp,
   width = 600,
   height = 400,
   showControls = true,

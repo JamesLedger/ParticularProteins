@@ -32,3 +32,14 @@ type Coordinate = {
   y: number;
   z: number;
 };
+
+// Metadata extracted from the CIF file
+type ProteinMetadata = {
+  title?: string;
+};
+
+// Result from parsing a CIF file
+type ProteinData = {
+  coordinates: Coordinate[];
+  metadata: ProteinMetadata;
+};
