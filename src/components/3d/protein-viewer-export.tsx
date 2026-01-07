@@ -2,7 +2,7 @@
 
 import { Canvas, useFrame } from "@react-three/fiber";
 import { CameraControls, Stage } from "@react-three/drei";
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { Box3, Vector3 } from "three";
 import InstancedAtoms from "./InstancedAtoms";
 
@@ -226,6 +226,51 @@ export default function ProteinViewer({
     return names[symbol] || symbol;
   };
 
+  const getElementColor = (element: string): string => {
+    switch (element) {
+      case "N":
+        return "#3b82f6"; // blue-500
+      case "C":
+        return "#22c55e"; // green-500
+      case "O":
+        return "#ef4444"; // red-500
+      case "S":
+        return "#eab308"; // yellow-500
+      case "P":
+        return "#FFA500"; // Orange
+      case "H":
+        return "#FF69B4"; // Pink
+      case "FE":
+        return "#E06633"; // Dark orange/rust
+      case "ZN":
+        return "#7D80B0"; // Steel blue
+      case "MG":
+        return "#228B22"; // Forest green
+      case "CA":
+        return "#3CB371"; // Medium sea green
+      case "CU":
+        return "#C88033"; // Copper/brown
+      case "MN":
+        return "#9C7AC7"; // Violet/gray
+      case "SE":
+        return "#FF8C00"; // Dark orange
+      case "K":
+        return "#8F40D4"; // Purple
+      case "NA":
+        return "#AB5CF2"; // Light purple
+      case "CL":
+        return "#1FF01F"; // Bright green
+      default:
+        return "#9ca3af"; // gray
+    }
+  };
+
+  // Get unique elements present in the current protein
+  const uniqueElements = useMemo(() => {
+    const elements = new Set(coordinates.map((coord) => coord.element));
+    return Array.from(elements).sort();
+  }, [coordinates]);
+
   return (
     <div className="space-y-4">
       <div
@@ -292,76 +337,22 @@ export default function ProteinViewer({
         )}
       </div>
 
-      <div className="text-xs text-muted-foreground text-center">
-        <p className="font-semibold mb-1">Color Guide:</p>
-        <div className="flex justify-center gap-2 sm:gap-3 flex-wrap px-2">
-          <span>
-            <span
-              className="inline-block w-3 h-3 rounded-full mr-1"
-              style={{ backgroundColor: "#FF69B4", border: "1px solid #999" }}
-            ></span>
-            Hydrogen
-          </span>
-          <span>
-            <span className="inline-block w-3 h-3 bg-blue-500 rounded-full mr-1"></span>
-            Nitrogen
-          </span>
-          <span>
-            <span className="inline-block w-3 h-3 bg-green-500 rounded-full mr-1"></span>
-            Carbon
-          </span>
-          <span>
-            <span className="inline-block w-3 h-3 bg-red-500 rounded-full mr-1"></span>
-            Oxygen
-          </span>
-          <span>
-            <span className="inline-block w-3 h-3 bg-yellow-500 rounded-full mr-1"></span>
-            Sulfur
-          </span>
-          <span>
-            <span
-              className="inline-block w-3 h-3 rounded-full mr-1"
-              style={{ backgroundColor: "#FFA500" }}
-            ></span>
-            Phosphorus
-          </span>
-          <span>
-            <span
-              className="inline-block w-3 h-3 rounded-full mr-1"
-              style={{ backgroundColor: "#E06633" }}
-            ></span>
-            Iron
-          </span>
-          <span>
-            <span
-              className="inline-block w-3 h-3 rounded-full mr-1"
-              style={{ backgroundColor: "#7D80B0" }}
-            ></span>
-            Zinc
-          </span>
-          <span>
-            <span
-              className="inline-block w-3 h-3 rounded-full mr-1"
-              style={{ backgroundColor: "#228B22" }}
-            ></span>
-            Magnesium
-          </span>
-          <span>
-            <span
-              className="inline-block w-3 h-3 rounded-full mr-1"
-              style={{ backgroundColor: "#3CB371" }}
-            ></span>
-            Calcium
-          </span>
-          <span>
-            <span
-              className="inline-block w-3 h-3 rounded-full mr-1"
-              style={{ backgroundColor: "#C88033" }}
-            ></span>
-            Copper
-          </span>
+      {uniqueElements.length > 0 && (
+        <div className="text-xs text-muted-foreground text-center">
+          <p className="font-semibold mb-1">Color Guide:</p>
+          <div className="flex justify-center gap-2 sm:gap-3 flex-wrap px-2">
+            {uniqueElements.map((element) => (
+              <span key={element}>
+                <span
+                  className="inline-block w-3 h-3 rounded-full mr-1"
+                  style={{ backgroundColor: getElementColor(element), border: "1px solid #999" }}
+                ></span>
+                {getElementName(element)}
+              </span>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
