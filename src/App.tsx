@@ -29,6 +29,7 @@ function App() {
   const [pdbId, setPdbId] = useState(urlProtein);
   const [inputValue, setInputValue] = useState(urlProtein);
   const [coordinates, setCoordinates] = useState<Coordinate[]>([]);
+  const [proteinMetadata, setProteinMetadata] = useState<ProteinMetadata>({});
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -64,7 +65,8 @@ function App() {
 
     try {
       const data = await fetchPDBData(inputValue.trim());
-      setCoordinates(data);
+      setCoordinates(data.coordinates);
+      setProteinMetadata(data.metadata);
       const proteinId = inputValue.trim().toUpperCase();
       setPdbId(proteinId);
       setError(null);
@@ -82,6 +84,7 @@ function App() {
         : `Failed to load protein: ${errorMessage}`;
       setError(helpfulError);
       setCoordinates([]);
+      setProteinMetadata({});
     } finally {
       setIsLoading(false);
     }
@@ -101,7 +104,8 @@ function App() {
 
     try {
       const data = await fetchPDBData(randomId);
-      setCoordinates(data);
+      setCoordinates(data.coordinates);
+      setProteinMetadata(data.metadata);
       const proteinId = randomId.toUpperCase();
       setPdbId(proteinId);
       setError(null);
@@ -114,6 +118,7 @@ function App() {
       const errorMessage = err instanceof Error ? err.message : "Failed to load protein";
       setError(`Failed to load random protein: ${errorMessage}. Try again!`);
       setCoordinates([]);
+      setProteinMetadata({});
     } finally {
       setIsLoading(false);
     }
@@ -175,9 +180,21 @@ function App() {
 
           {!isLoading && coordinates.length > 0 && (
             <div className="space-y-2">
-              <p className="text-sm text-gray-600">
-                Viewing: <span className="font-semibold">{pdbId}</span> ({coordinates.length} atoms)
-              </p>
+              <div className="text-sm text-gray-600">
+                <p>
+                  Viewing: <span className="font-semibold">{pdbId}</span> ({coordinates.length} atoms)
+                </p>
+                {proteinMetadata.name && (
+                  <p>
+                    Name: <span className="font-semibold">{proteinMetadata.name}</span>
+                  </p>
+                )}
+                {proteinMetadata.description && (
+                  <p>
+                    Description: <span className="font-semibold">{proteinMetadata.description}</span>
+                  </p>
+                )}
+              </div>
               <ProteinViewer
                 coordinates={coordinates}
                 width="100%"
