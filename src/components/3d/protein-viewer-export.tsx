@@ -25,10 +25,12 @@ function ProteinCanvas({
   coordinates,
   onSelect,
   onCameraReady,
+  rotationSpeed = 0.005,
 }: Readonly<{
   coordinates: Coordinate[];
   onSelect?: (coord: Coordinate) => void;
   onCameraReady?: (resetFn: () => void) => void;
+  rotationSpeed?: number;
 }>) {
   const cameraControlsRef = useRef<CameraControls>(null);
   const [autoRotateEnabled, setAutoRotateEnabled] = useState(true);
@@ -126,6 +128,7 @@ function ProteinCanvas({
       <AutoRotate
         cameraControlsRef={cameraControlsRef}
         enabled={autoRotateEnabled}
+        speed={rotationSpeed}
       />
       <Stage adjustCamera={false}>
         <InstancedAtoms coordinates={coordinates} onSelect={onSelect} />
@@ -137,13 +140,15 @@ function ProteinCanvas({
 function AutoRotate({
   cameraControlsRef,
   enabled,
+  speed,
 }: {
   cameraControlsRef: React.RefObject<CameraControls | null>;
   enabled: boolean;
+  speed: number;
 }) {
   useFrame(() => {
     if (enabled && cameraControlsRef.current) {
-      cameraControlsRef.current.azimuthAngle += 0.005;
+      cameraControlsRef.current.azimuthAngle += speed;
     }
   });
   return null;
@@ -165,6 +170,7 @@ export default function ProteinViewer({
   const [error, setError] = useState<string | null>(null);
   const [selectedAtom, setSelectedAtom] = useState<Coordinate | null>(null);
   const [resetCameraFn, setResetCameraFn] = useState<(() => void) | null>(null);
+  const [rotationSpeed, setRotationSpeed] = useState(0.005);
 
   // If coordinates are provided as prop, use them directly
   useEffect(() => {
@@ -299,6 +305,7 @@ export default function ProteinViewer({
             coordinates={coordinates}
             onSelect={setSelectedAtom}
             onCameraReady={handleCameraReady}
+            rotationSpeed={rotationSpeed}
           />
         )}
 
@@ -326,13 +333,29 @@ export default function ProteinViewer({
         </p>
 
         {showControls && resetCameraFn && (
-          <div className="flex justify-center">
+          <div className="flex flex-col items-center gap-3">
             <button
               onClick={resetCameraFn}
               className="px-3 py-1.5 sm:px-4 sm:py-2 text-sm bg-primary text-primary-foreground rounded hover:bg-primary/90 transition-colors"
             >
               Reset View
             </button>
+            <div className="flex items-center gap-3 w-full max-w-xs">
+              <label htmlFor="rotation-speed" className="text-sm whitespace-nowrap">
+                Rotation Speed:
+              </label>
+              <input
+                id="rotation-speed"
+                type="range"
+                min="0"
+                max="0.02"
+                step="0.001"
+                value={rotationSpeed}
+                onChange={(e) => setRotationSpeed(parseFloat(e.target.value))}
+                className="flex-1"
+              />
+              <span className="text-xs w-10 text-right">{rotationSpeed.toFixed(3)}</span>
+            </div>
           </div>
         )}
       </div>
