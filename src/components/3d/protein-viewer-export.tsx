@@ -348,7 +348,7 @@ export default function ProteinViewer({
                 id="rotation-speed"
                 type="range"
                 min="0"
-                max="0.02"
+                max="0.04"
                 step="0.001"
                 value={rotationSpeed}
                 onChange={(e) => setRotationSpeed(parseFloat(e.target.value))}
